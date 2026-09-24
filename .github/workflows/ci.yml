@@ -1,4 +1,4 @@
-name: CI
+name: CI/CD
 
 on:
   push:
@@ -6,6 +6,7 @@ on:
       - main
 
 jobs:
+
   build:
     runs-on: ubuntu-latest
 
@@ -29,3 +30,14 @@ jobs:
 
       - name: Push Docker image
         run: docker push ghcr.io/florinmnt/cicd-nginx-demo:latest
+
+
+  deploy:
+    needs: build
+    runs-on: self-hosted
+
+    steps:
+      - name: Deploy to Kubernetes
+        run: |
+          kubectl rollout restart deployment/cicd-nginx-demo
+          kubectl rollout status deployment/cicd-nginx-demo --timeout=120s
